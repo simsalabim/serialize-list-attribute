@@ -1,4 +1,4 @@
-# Serialize attributes like a boss
+# Serialize attributes like a boss ![Build Status](https://travis-ci.org/simsalabim/serialize-list-attribute.png "Build Status")
 
 This gem adds helper methods to serialize AR model simple text attribute to an array or hash,
 handles the field updates and allows to perform per-item validation.
@@ -21,19 +21,19 @@ Or install it yourself as:
 Example: we store emails recipients as simple text field, but want to operate them as it was an array and,
 into the bargain, perform internal validation on create/update.
 
-Initialize in a model:
+In a model:
 ```ruby
 class MailingList < ActiveRecord::Base
   attr_accessible :recipients
+
   include SerializeListAttribute
-  serialize_list_attributes :recipients, :recipients_emails_funnel_report, validation_method: :validate_for_email
+  # this will create an attr_writer with prefix 'raw_' sou you could use it in views to assign string
+  # values, not arrays/hashes, whereas the field itself (e.g. :recipients) will accept an array/hash.
+  serialize_list_attributes :recipients, validation_method: :validate_length
 
   # validation method which is to be invoked on each recipients array item
-  # consider email? method returns false if string is not a valid email address
-  def validate_for_email value, column
-    unless value.email?
-      errors.add column, 'Your validation error message'
-    end
+  def validate_length item, column
+    errors.add column, 'Should be 5 characters or longer!' if item.length < 5
   end
 end
 ```
